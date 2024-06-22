@@ -18,6 +18,13 @@ class Employee(models.Model):
     data_admission = models.DateField(verbose_name='Дата прийому')
     email = models.EmailField(verbose_name='Email')
     position = models.ForeignKey(Position, on_delete=models.CASCADE, verbose_name='Посада')
+    supervisor = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Начальник"
+    )
 
     def __str__(self):
         return self.name
