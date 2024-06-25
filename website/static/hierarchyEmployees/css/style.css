@@ -1,0 +1,12 @@
+.logout-btn{
+    color: red !important;
+}
+.logout-btn:hover{
+    color: green !important;
+}
+a{
+    font-size: 1.2rem;
+}
+a:hover{
+    color: #000 !important;
+}

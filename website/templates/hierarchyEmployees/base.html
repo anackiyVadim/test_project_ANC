@@ -6,19 +6,44 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
+    <link href="{% static 'hierarchyEmployees/css/style.css' %}" rel="stylesheet">
     <link href="{% static 'hierarchyEmployees/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'hierarchyEmployees/css/bootstrap-responsive.min.css' %}" rel="stylesheet">
-    <link href="{% static 'hierarchyEmployees/css/style.css' %}" rel="stylesheet">
 </head>
 <body>
 <header>
-
+    <div class="container">
+        <nav class="navbar">
+                <ul class="nav">
+                    <li class="">
+                        <a class="" href="{% url 'index' %}">Main</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'all_info_employees' %}">All Employees</a>
+                    </li>
+                     <li>
+                        <a href="{% url 'crud' %}">CRUD</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a class="logout-btn" href="{% url 'account_logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                     <li>
+                        <a href="{% url 'login_User' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+        </nav>
+    </div>
 </header>
 
-{% block content%}
-
-
-{% endblock %}
+<!--Main block content-->
+<div class="container">
+        <div class="row">
+            {% block content%}{% endblock %}
+        </div>
+</div>
 
 <footer>
 

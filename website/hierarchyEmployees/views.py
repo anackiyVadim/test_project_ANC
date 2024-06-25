@@ -1,12 +1,99 @@
-from django.shortcuts import render
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
+from django.shortcuts import render, redirect
+from rest_framework import viewsets
+
+from .serializers import EmployeeSerializer
+from .models import Employee
+
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+    def get_queryset(self):
+        level = self.request.query_params.get('level', None)
+        parent_id = self.request.query_params.get('parent_id', None)
+        if level is not None:
+            level = int(level)
+            if level == 1:
+                return Employee.objects.filter(supervisor__isnull=True)
+            elif parent_id is not None:
+                return Employee.objects.filter(supervisor_id=parent_id)
+        return super().get_queryset()
+
+class InfoEmployeesFiltr(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        name = self.request.query_params.get('name', None)
+        surname = self.request.query_params.get('surname', None)
+        surname_patronymic = self.request.query_params.get('surname_patronymic', None)
+        data_admission = self.request.query_params.get('data_admission', None)
+        email = self.request.query_params.get('email', None)
+        position = self.request.query_params.get('position', None)
+        supervisor = self.request.query_params.get('supervisor', None)
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if surname:
+            queryset = queryset.filter(surname__icontains=surname)
+        if surname_patronymic:
+            queryset = queryset.filter(surname_patronymic__icontains=surname_patronymic)
+        if data_admission:
+            queryset = queryset.filter(data_admission__icontains=data_admission)
+        if email:
+            queryset = queryset.filter(email__icontains=email)
+        if position:
+            queryset = queryset.filter(position__position_name__icontains=position)
+        if supervisor:
+            queryset = queryset.filter(supervisor__name__icontains=supervisor)
+
+        return queryset
+
 def base():
     context = {}
     return context
 
 
 def index(request):
+    # filt_position = Position.objects.all()
     context = {}
     context.update(base())
     return render(request, 'hierarchyEmployees/index.html', context)
+
+def all_info_employees(request):
+    employee = Employee.objects.all()
+    context = {'employee': employee}
+    context.update(base())
+    return render(request, 'hierarchyEmployees/all_info_employees.html', context)
+
+
+@login_required
+def crud(request):
+    context = {}
+    return render(request, 'hierarchyEmployees/CRUD.html', context)
+
+
+def login_User(request):
+    context = {}
+    context.update(base())
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('crud')
+        else:
+            return render(request, 'hierarchyEmployees/login.html',
+                          {'error_message': 'Неправильное имя пользователя или пароль.'})
+    else:
+        return render(request, 'hierarchyEmployees/login.html', context)
+
+def logoutView(request):
+    logout(request)
+    return redirect('index')

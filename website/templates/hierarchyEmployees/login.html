@@ -1,0 +1,18 @@
+{% extends "hierarchyEmployees/base.html" %}
+{% block content%}
+
+<div class="reg__wrapp">
+    <h3 class="reg__head">Войти</h3>
+    <form method="POST" action="{% url 'login_User' %}" class="reg__form">
+        {% csrf_token %}
+        <div class="reg__input-mask far fa-user">
+            <input class="reg__input" name="username" placeholder="Имя" type="text" >
+        </div>
+        <div class="reg__input-mask fas fa-lock">
+            <input class="reg__input" name="password" placeholder="Пароль" type="password" >
+        </div>
+        <input class="reg__submit" value="Войти" type="submit" >
+    </form>
+</div>
+
+{% endblock %}

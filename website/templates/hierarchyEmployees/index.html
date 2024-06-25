@@ -1,6 +1,80 @@
 {% extends "hierarchyEmployees/base.html" %}
 {% block content%}
+    <style>
+        ul { list-style-type: none; }
+        .nested { display: none; }
+        .active { display: block; }
+    </style>
 
-    <h1>Title</h1>
+    <h1>Employee Hierarchy</h1>
+    <ul id="employee-tree">
+
+    </ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function loadEmployees(level, parentId) {
+                let url = `/api/employees/?level=${level}`;
+                if (parentId) {
+                    url += `&parent_id=${parentId}`;
+                }
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const ul = parentId ? document.getElementById(`children-${parentId}`) : document.getElementById('employee-tree');
+                        data.forEach(employee => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>
+                                    <strong>${employee.name}</strong>
+                                    </th>
+                                    <th>
+                                    <strong>${employee.surname}</strong>
+                                    </th>
+                                    <th>
+                                    <strong>${employee.surname_patronymic}</strong>
+                                    </th>
+                                    <th>
+                                    <span>${employee.position.position_name}</span>
+                                    </th>
+                                    <th>
+                                    <span>${employee.data_admission}</span>
+                                    </th>
+                                    <th>
+                                    <span>${employee.email}</span>
+                                    </th>
+<!--                                    <th>-->
+<!--                                    <span>${employee.supervisor}</span>-->
+<!--                                    </th>-->
+                                    <th>
+                                    <button onclick="toggleChildren(${employee.id}, ${level + 1})">Toggle</button>
+                                    </th>
+                                    <ul id="children-${employee.id}" class="nested"></ul>
+                                </tr>
+                            </thead>
+                            `;
+                            ul.appendChild(li);
+                        });
+                    });
+            }
+
+            window.toggleChildren = function(parentId, level) {
+                const ul = document.getElementById(`children-${parentId}`);
+                if (ul.classList.contains('active')) {
+                    ul.classList.remove('active');
+                } else {
+                    ul.classList.add('active');
+                    if (!ul.hasChildNodes()) {
+                        loadEmployees(level, parentId);
+                    }
+                }
+            }
+
+            loadEmployees(1);
+        });
+    </script>
+
 
 {% endblock %}

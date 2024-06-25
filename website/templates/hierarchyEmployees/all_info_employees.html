@@ -1,0 +1,86 @@
+{% extends "hierarchyEmployees/base.html" %}
+{% block content%}
+<style>
+        ul { list-style-type: none; }
+        .nested { display: none; }
+        .active { display: block; }
+        .filter-input { width: 100%; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <table class="table">
+        <thead>
+            <tr>
+                <th><input type="text" class="filter-input" data-column="name" placeholder="Фільтр по імені"></th>
+                <th><input type="text" class="filter-input" data-column="surname" placeholder="Фільтр по прізвищу"></th>
+                <th><input type="text" class="filter-input" data-column="surname_patronymic" placeholder="Фільтр по побатькові"></th>
+                <th><input type="text" class="filter-input" data-column="data_admission" placeholder="Фільтр по даті прийому"></th>
+                <th><input type="text" class="filter-input" data-column="email" placeholder="Фільтр по email"></th>
+                <th><input type="text" class="filter-input" data-column="position" placeholder="Фільтр по посаді"></th>
+                <th><input type="text" class="filter-input" data-column="supervisor" placeholder="Фільтр по начальнику"></th>
+            </tr>
+            <tr>
+                <th>Ім'я</th>
+                <th>Призвище</th>
+                <th>Побатькові</th>
+                <th>Дата прийому</th>
+                <th>Email</th>
+                <th>Посада</th>
+                <th>Начальник</th>
+            </tr>
+        </thead>
+        <tbody id="employee-table-body">
+            {% for person in employee %}
+            <tr>
+                <td>{{ person.name }}</td>
+                <td>{{ person.surname }}</td>
+                <td>{{ person.surname_patronymic }}</td>
+                <td>{{ person.data_admission }}</td>
+                <td>{{ person.email }}</td>
+                <td>{{ person.position }}</td>
+                <td>
+                    {% if person.supervisor == None %}
+                        <p>Not date</p>
+                    {% else %}
+                        {{ person.supervisor }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $(".filter-input").on("keyup", function() {
+                var filters = {};
+                $(".filter-input").each(function() {
+                    filters[$(this).data("column")] = $(this).val();
+                });
+
+                $.ajax({
+                    url: "/api/all_employees/",
+                    data: filters,
+                    success: function(data) {
+                        $("#employee-table-body").empty();
+                        data.forEach(function(employee) {
+                            var supervisorName = employee.supervisor ? employee.supervisor.name : 'Нет начальника';
+                            $("#employee-table-body").append(`
+                                <tr>
+                                    <td>${employee.name}</td>
+                                    <td>${employee.surname}</td>
+                                    <td>${employee.surname_patronymic}</td>
+                                    <td>${employee.data_admission}</td>
+                                    <td>${employee.email}</td>
+                                    <td>${employee.position.position_name}</td>
+                                    <td>${supervisorName}</td>
+                                </tr>
+                            `);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
