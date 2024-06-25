@@ -14,7 +14,7 @@ class Position(models.Model):
 class Employee(models.Model):
     name = models.TextField(verbose_name=f'Ім`я')
     surname = models.TextField(verbose_name='Призвище')
-    surname_patronymic = models.TextField(verbose_name='По батькові')
+    surname_patronymic = models.TextField(verbose_name='Побатькові')
     data_admission = models.DateField(verbose_name='Дата прийому')
     email = models.EmailField(verbose_name='Email')
     position = models.ForeignKey(Position, on_delete=models.CASCADE, verbose_name='Посада')
@@ -23,13 +23,23 @@ class Employee(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name='subordinates',
         verbose_name="Начальник"
     )
+    level = models.IntegerField(default=1, verbose_name="Рівень ієрархії")
+
+    def save(self, *args, **kwargs):
+        if self.supervisor:
+            self.level = self.supervisor.level + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'Cпівробітник'
-        verbose_name_plural = 'Співробітники'
+        verbose_name = "Співробітник"
+        verbose_name_plural = "Співробітники"
+        ordering = ['name']
+
+
 
