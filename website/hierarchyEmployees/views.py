@@ -1,20 +1,22 @@
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
+
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from .serializers import EmployeeSerializer
 from .models import Employee
-
 from .forms import OptionsEmploeeForm
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         level = self.request.query_params.get('level', None)
@@ -30,6 +32,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 class InfoEmployeesFiltr(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -68,6 +71,10 @@ class InfoEmployeesFiltr(viewsets.ModelViewSet):
             'is_authenticated': request.user.is_authenticated
         })
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def base():

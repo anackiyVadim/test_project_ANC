@@ -6,57 +6,85 @@
         .active { display: block; }
         .filter-input { width: 100%; }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        <table class="table">
-    <thead>
-        <tr>
-            <th><input type="text" class="filter-input" data-column="name" placeholder="Фільтр по імені"></th>
-            <th><input type="text" class="filter-input" data-column="surname" placeholder="Фільтр по прізвищу"></th>
-            <th><input type="text" class="filter-input" data-column="surname_patronymic" placeholder="Фільтр по побатькові"></th>
-            <th><input type="text" class="filter-input" data-column="data_admission" placeholder="Фільтр по даті прийому"></th>
-            <th><input type="text" class="filter-input" data-column="email" placeholder="Фільтр по email"></th>
-            <th><input type="text" class="filter-input" data-column="position" placeholder="Фільтр по посаді"></th>
-            <th><input type="text" class="filter-input" data-column="supervisor" placeholder="Фільтр по начальнику"></th>
-        </tr>
-        <tr>
-            <th>Ім'я</th>
-            <th>Призвище</th>
-            <th>Побатькові</th>
-            <th>Дата прийому</th>
-            <th>Email</th>
-            <th>Посада</th>
-            <th>Начальник</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody id="employee-table-body">
-        {% for person in employee %}
-        <tr>
-            <td>{{ person.name }}</td>
-            <td>{{ person.surname }}</td>
-            <td>{{ person.surname_patronymic }}</td>
-            <td>{{ person.data_admission }}</td>
-            <td>{{ person.email }}</td>
-            <td>{{ person.position.position_name }}</td>
-            <td>
-                {% if person.supervisor == None %}
-                    <p>Not date</p>
-                {% else %}
-                    {{ person.supervisor.name }}
+     <table class="table">
+        <thead>
+            <tr>
+                <th><input type="text" class="filter-input" data-column="name" placeholder="Фільтр по імені"></th>
+                <th><input type="text" class="filter-input" data-column="surname" placeholder="Фільтр по прізвищу"></th>
+                <th><input type="text" class="filter-input" data-column="surname_patronymic" placeholder="Фільтр по побатькові"></th>
+                <th><input type="text" class="filter-input" data-column="data_admission" placeholder="Фільтр по даті прийому"></th>
+                <th><input type="text" class="filter-input" data-column="email" placeholder="Фільтр по email"></th>
+                <th><input type="text" class="filter-input" data-column="position" placeholder="Фільтр по посаді"></th>
+                <th><input type="text" class="filter-input" data-column="supervisor" placeholder="Фільтр по начальнику"></th>
+            </tr>
+            <tr>
+                <th>Ім'я</th>
+                <th>Призвище</th>
+                <th>Побатькові</th>
+                <th>Дата прийому</th>
+                <th>Email</th>
+                <th>Посада</th>
+                <th>Начальник</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="employee-table-body">
+            {% for person in employee %}
+            <tr>
+                <td>{{ person.name }}</td>
+                <td>{{ person.surname }}</td>
+                <td>{{ person.surname_patronymic }}</td>
+                <td>{{ person.data_admission }}</td>
+                <td>{{ person.email }}</td>
+                <td>{{ person.position.position_name }}</td>
+                <td>
+                    {% if person.supervisor == None %}
+                        <p>Not date</p>
+                    {% else %}
+                        {{ person.supervisor.name }}
+                    {% endif %}
+                </td>
+                {% if user.is_authenticated %}
+                <td>
+                    <a href="{% url 'edit_employee' person.pk %}" class="btn btn-warning">Edit</a>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-id="{{ person.id }}">Delete</button>
+                </td>
                 {% endif %}
-            </td>
-            {% if user.is_authenticated %}
-            <td>
-                <a href="{% url 'edit_employee' person.pk %}" class="btn btn-warning">Edit</a>
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Подтвердить удаление</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить этого сотрудника?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
+    var deleteEmployeeId;
+
+    $('#deleteModal').on('show.bs.modal', function(event) {
+        var employeeId = $(event.relatedTarget);
+        deleteEmployeeId = employeeId.data('id');
+        console.log(deleteEmployeeId);
+    });
+
     $(document).ready(function() {
         $(".filter-input").on("keyup", function() {
             var filters = {};
@@ -74,6 +102,7 @@
                     employees.forEach(function(employee) {
                         var supervisorName = employee.supervisor ? employee.supervisor.name : 'Нет начальника';
                         var editButton = isAuthenticated ? `<td><a href="/edit_employee/${employee.id}/" class="btn btn-warning">Edit</a></td>` : '';
+                        var deleteButton = isAuthenticated ? `<td><button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-id="${employee.id}">Delete</button></td>` : '';
                         $("#employee-table-body").append(`
                             <tr>
                                 <td>${employee.name}</td>
@@ -84,13 +113,28 @@
                                 <td>${employee.position.position_name}</td>
                                 <td>${supervisorName}</td>
                                 ${editButton}
+                                ${deleteButton}
                             </tr>
                         `);
                     });
                 }
             });
         });
+
+
+        $('#confirmDelete').on('click', function() {
+            $.ajax({
+                url: `/api/employees/${deleteEmployeeId}/`,
+                type: 'DELETE',
+                success: function(result) {
+                    $('#deleteModal').modal('hide');
+                    $(`button[data-id="${deleteEmployeeId}"]`).closest('tr').remove();
+                }
+            });
+        });
     });
 </script>
+
+
 
 {% endblock %}
