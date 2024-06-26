@@ -2,10 +2,13 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 
 from django.shortcuts import render, redirect
+from django.utils.timezone import now
 from rest_framework import viewsets
 
 from .serializers import EmployeeSerializer
 from .models import Employee
+
+from .forms import AddEmploeeForm
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -74,7 +77,14 @@ def all_info_employees(request):
 
 @login_required
 def crud(request):
-    context = {}
+    if request.method == 'POST':
+        form_new_emploee = AddEmploeeForm(request.POST)
+        if form_new_emploee.is_valid():
+            form_new_emploee.save()
+            return redirect('index')
+    else:
+        form_new_emploee = AddEmploeeForm()
+    context = {"form_new_emploee": form_new_emploee}
     return render(request, 'hierarchyEmployees/CRUD.html', context)
 
 

@@ -2,7 +2,14 @@
 {% block content%}
 
 <section>
-    <h3>New Employee</h3>
+    <h3>Add New Employee</h3>
+    <div class="wrapp">
+        <form method="POST" action="">
+        {% csrf_token %}
+        {{ form_new_emploee.as_p }}
+        <button type="submit" class="btn btn-primary">Add Employee</button>
+        </form>
+    </div>
 </section>
 
 
