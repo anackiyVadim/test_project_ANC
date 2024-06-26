@@ -1,14 +1,15 @@
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from rest_framework import viewsets
+from rest_framework.response import Response
 
 from .serializers import EmployeeSerializer
 from .models import Employee
 
-from .forms import AddEmploeeForm
+from .forms import OptionsEmploeeForm
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -57,6 +58,18 @@ class InfoEmployeesFiltr(viewsets.ModelViewSet):
 
         return queryset
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        return Response({
+            'employees': data,
+            'is_authenticated': request.user.is_authenticated
+        })
+
+
+
 def base():
     context = {}
     return context
@@ -78,15 +91,26 @@ def all_info_employees(request):
 @login_required
 def crud(request):
     if request.method == 'POST':
-        form_new_emploee = AddEmploeeForm(request.POST)
+        form_new_emploee = OptionsEmploeeForm(request.POST)
         if form_new_emploee.is_valid():
             form_new_emploee.save()
             return redirect('index')
     else:
-        form_new_emploee = AddEmploeeForm()
+        form_new_emploee = OptionsEmploeeForm()
     context = {"form_new_emploee": form_new_emploee}
     return render(request, 'hierarchyEmployees/CRUD.html', context)
 
+def edit_employee(request, pk):
+    employee = get_object_or_404(Employee, pk=pk)
+    if request.method == 'POST':
+        edit_form = OptionsEmploeeForm(request.POST, instance=employee)
+        if edit_form.is_valid():
+            edit_form.save()
+            return redirect('all_info_employees')
+    else:
+        edit_form = OptionsEmploeeForm(instance=employee)
+    context = {'edit_form': edit_form, 'employee': employee}
+    return render(request, 'hierarchyEmployees/edit_employees.html', context)
 
 def login_User(request):
     context = {}

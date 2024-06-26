@@ -1,0 +1,39 @@
+{% extends "hierarchyEmployees/base.html" %}
+{% block content%}
+ <h1>Edit employee: {{ employee.name }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ edit_form.name.label_tag }}
+                {{ edit_form.name }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.surname.label_tag }}
+                {{ edit_form.surname }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.surname_patronymic.label_tag }}
+                {{ edit_form.surname_patronymic }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.data_admission.label_tag }}
+                {{ edit_form.data_admission }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.email.label_tag }}
+                {{ edit_form.email }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.position.label_tag }}
+                {{ edit_form.position }}
+            </div>
+            <div class="form-group">
+                {{ edit_form.supervisor.label_tag }}
+                {{ edit_form.supervisor }}
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </form>
+        <a href="{% url 'all_info_employees' %}" class="btn btn-secondary">Назад к списку сотрудников</a>
+
+
+{% endblock %}

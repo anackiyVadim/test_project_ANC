@@ -3,7 +3,7 @@ from django import forms
 from .models import Employee
 
 
-class AddEmploeeForm(forms.ModelForm):
+class OptionsEmploeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields = ['name', 'surname', 'surname_patronymic', 'data_admission', 'email', 'position', 'supervisor']
